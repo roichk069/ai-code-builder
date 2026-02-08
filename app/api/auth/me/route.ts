@@ -5,19 +5,29 @@ export async function GET() {
   try {
     const user = await getCurrentUser();
     
+    // If no user is authenticated, return a guest user instead of failing
     if (!user) {
-      return NextResponse.json(
-        { error: 'Not authenticated' },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        user: {
+          userId: 0,
+          email: 'guest@local',
+          name: 'Guest User'
+        },
+        isGuest: true
+      });
     }
     
-    return NextResponse.json({ user });
+    return NextResponse.json({ user, isGuest: false });
   } catch (error) {
     console.error('Auth check error:', error);
-    return NextResponse.json(
-      { error: 'Authentication check failed' },
-      { status: 500 }
-    );
+    // On any error, return guest user to keep app functional
+    return NextResponse.json({
+      user: {
+        userId: 0,
+        email: 'guest@local',
+        name: 'Guest User'
+      },
+      isGuest: true
+    });
   }
 }

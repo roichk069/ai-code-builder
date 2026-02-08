@@ -224,7 +224,7 @@ export function PreviewFrame() {
         <iframe
           ref={iframeRef}
           className="w-full h-full border-0 bg-white"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
+          sandbox="allow-scripts allow-forms allow-modals"
           title="Preview"
         />
       </div>

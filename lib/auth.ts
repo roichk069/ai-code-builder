@@ -39,14 +39,20 @@ export function verifyToken(token: string): TokenPayload | null {
 
 // Get current user from cookies
 export async function getCurrentUser(): Promise<TokenPayload | null> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get('auth-token')?.value;
-  
-  if (!token) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token')?.value;
+    
+    if (!token) {
+      return null;
+    }
+    
+    return verifyToken(token);
+  } catch (error) {
+    // Handle cookie errors gracefully
+    console.warn('Error getting current user:', error);
     return null;
   }
-  
-  return verifyToken(token);
 }
 
 // Set auth cookie

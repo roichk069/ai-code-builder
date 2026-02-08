@@ -1,16 +1,44 @@
 import mysql from 'mysql2/promise';
+import type { Pool } from 'mysql2/promise';
 
-const pool = mysql.createPool({
-  host: process.env.DATABASE_HOST || 'localhost',
-  user: process.env.DATABASE_USER || 'root',
-  password: process.env.DATABASE_PASSWORD || '',
-  database: process.env.DATABASE_NAME || 'ai_code_builder',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
+// Create database pool lazily - only when needed
+let pool: Pool | null = null;
+let poolError: Error | null = null;
+
+function getPool(): Pool {
+  if (poolError) {
+    throw poolError;
+  }
+  
+  if (!pool) {
+    try {
+      pool = mysql.createPool({
+        host: process.env.DATABASE_HOST || 'localhost',
+        user: process.env.DATABASE_USER || 'root',
+        password: process.env.DATABASE_PASSWORD || '',
+        database: process.env.DATABASE_NAME || 'ai_code_builder',
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+      });
+    } catch (error) {
+      poolError = error as Error;
+      console.error('Failed to create database pool:', error);
+      throw error;
+    }
+  }
+  
+  return pool;
+}
+
+// Export a proxy that creates the pool on first access
+export default new Proxy({} as Pool, {
+  get(target, prop) {
+    const poolInstance = getPool();
+    const value = poolInstance[prop as keyof Pool];
+    return typeof value === 'function' ? value.bind(poolInstance) : value;
+  }
 });
-
-export default pool;
 
 // Type definitions
 export interface User {
