@@ -4,11 +4,12 @@ import { templates } from '@/lib/templates';
 import { useStore } from '@/lib/store';
 import { Sparkles } from 'lucide-react';
 
-export function TemplateSelector() {
+export function TemplateSelector({ onSelected }: { onSelected?: () => void }) {
   const { loadTemplate } = useStore();
 
   const handleSelectTemplate = (templateFiles: Record<string, string>) => {
     loadTemplate(templateFiles);
+    onSelected?.();
   };
 
   return (
